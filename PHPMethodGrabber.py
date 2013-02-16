@@ -5,22 +5,29 @@ import os
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
+
+	
+
 	def on_query_completions(self, view, prefix, locations):
+		mg = methodgrabberCommand
 		phpVariable = False
 		words = set()
 		#Get the Current Directory
 		fileDir = os.path.dirname(view.file_name())
-		print fileDir
+		
 		#Get the Active Views File Name
 		fileName= os.path.basename(view.file_name())
 		
 		phpfiles = []
 
+		
 		#Only build list if defining/typing a variable
 		if view.substr(locations[0] - 2) == ">" and view.substr(locations[0] - 3) == "-":
 			phpVariable = True
 
+		line =  view.line(locations[0])
 
+		lineStr = view.substr(line)
 
 		#Build a list of all the php files in directory where active file resides.
 		if phpVariable == True:
