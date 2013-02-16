@@ -10,7 +10,7 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 		words = set()
 		#Get the Current Directory
 		fileDir = os.path.dirname(view.file_name())
-
+		print fileDir
 		#Get the Active Views File Name
 		fileName= os.path.basename(view.file_name())
 		
@@ -36,6 +36,8 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 		words.update(phpfiles)
 
 		matches = [(f,f) for f in words]
-		print locations
+		#print locations
+
+		
 		return matches
 
