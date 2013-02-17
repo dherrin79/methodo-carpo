@@ -28,6 +28,21 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 		line =  view.line(locations[0])
 
 		lineStr = view.substr(line)
+		#print lineStr
+
+		str = lineStr.strip()
+
+		
+
+		if str.startswith('$'):
+			print str
+			if "->" in str:
+				print "str contains the characters: ->"
+			else:
+				print "str is not object"
+		else:
+			print "Not a Variable"
+		
 
 		#Build a list of all the php files in directory where active file resides.
 		if phpVariable == True:
