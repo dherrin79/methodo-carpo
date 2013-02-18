@@ -27,6 +27,7 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 
 		line =  view.line(locations[0])
 
+
 		lineStr = view.substr(line)
 		#print lineStr
 
@@ -36,13 +37,14 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 
 		if str.startswith('$'):
 			print str
-			if "->" in str:
+			if "->" in str or ".." in str: #In the future replace ".."" with user settings for possible user snippet tabTriggers.  For example, I have a snippet that uses .. to create the -> for calling php methods.
 				print "str contains the characters: ->"
+
 			else:
 				print "str is not object"
 		else:
 			print "Not a Variable"
-		
+	
 
 		#Build a list of all the php files in directory where active file resides.
 		if phpVariable == True:
@@ -59,7 +61,7 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 
 		matches = [(f,f) for f in words]
 		#print locations
-
+		
 		
 		return matches
 
