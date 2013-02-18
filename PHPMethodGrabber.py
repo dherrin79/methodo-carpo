@@ -2,11 +2,66 @@ import sublime, sublime_plugin
 import re
 import os
 
+completions = []
+
+class FindMethodsCommand(sublime_plugin.TextCommand):
+
+	def run(self, edit):
+		sel = self.view.sel()[0]
+		objIdentifier = self.view.word(sel.end()  -1)
+
+		self.view.insert(edit, sel.begin() , "->")
+		line = self.view.line(sel)
+
+		line = self.view.substr(line).strip()
+		class_name = ""
+		if line.startswith("$"):
+			a_view = self.view.substr(sublime.Region(0, self.view.size()))
+			class_name = self.get_class_name(line,a_view)
+
+		if not class_name:
+			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
+		else:
+			self.find_class_file(class_name)
+
+
+
+	def get_class_name(self, obj_line, a_view):
+		v = self.view # shorten call to self.view
+		o_type = None
+		print "obj_line: " + obj_line
+
+		mcPatt = '\$(\w+)->'
+
+		identifier = re.findall(mcPatt, a_view)
+		identifier = identifier[0]
+		print "Ide: " + identifier
+
+		oiPatt = '\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)'
+
+		if v.find_all(oiPatt):
+			rg = v.find_all(oiPatt)[0]
+			clPatt = '\$\w+\s*=\s*new\s*(\w+)\(\)'
+			objInts = v.substr(rg)
+			print "Stupid: " + objInts
+			class_name = re.search('\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)' , objInts)
+			if class_name is not None:
+				class_name = class_name.group(2)
+			else:
+				print "class_name is NoNe"
+				class_name = None
+			print "Obj Instantiation: " + v.substr(rg)
+		else:
+			print "Object not instantiated!"
+			class_name = None
+
+		return class_name
+
+	def find_class_file(class_name):
+		fileName = ""
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
-
-	
 
 	def on_query_completions(self, view, prefix, locations):
 		mg = methodgrabberCommand

@@ -16,3 +16,4 @@ Grab methods only from the class that is associated with the object currently be
 If possible override auto-completions list and add only those methods to it. 
 
 2013-02-17  Currenty under development.
+
