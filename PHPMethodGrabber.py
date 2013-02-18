@@ -121,7 +121,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		return methods
 
 
-
+	def build_completions_list(self, methods)
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
