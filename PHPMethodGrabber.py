@@ -22,7 +22,12 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
 		else:
-			self.find_class_file(class_name)
+
+			classDef = self.find_class_file(class_name)
+			#print "Class definition: " + classDef
+			methods = self.extract_class_methods(classDef)
+
+			self.build_completions_list(methods)
 
 
 
@@ -57,8 +62,66 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		return class_name
 
-	def find_class_file(class_name):
+	def find_class_file(self, class_name):
 		fileName = ""
+		v = self.view
+		#Get the current directory
+		fileDir = os.path.dirname(v.file_name())
+
+		#Get the active view's file name
+		fileName = os.path.basename(v.file_name())
+
+		
+		read_data = ""
+		for fn in os.listdir(fileDir):
+			fName, ext = os.path.splitext(fn)
+			if ext == ".php":
+				print class_name
+				cfPatt = 'class ' + re.escape(class_name) + '\{'
+				fileit = fileDir + "\\" + fName + ext
+				
+				with open(fileit) as f:
+					read_data = f.read()
+
+				cl = re.search(cfPatt, read_data)
+				
+				if cl is not None:
+					print "Class file located."
+					return read_data
+					
+				else:
+					print "Class File not located in " + fileDir
+
+				
+			elif ext == "":
+				print "This is a directory: " + fn
+			else:
+				print "Other file types: " + fn
+
+	def extract_class_methods(self, class_file):
+		methods = []
+		
+		method_lines = re.findall('function.*|private.*|public.*|protected.*', class_file)
+		comments = re.findall("/\*.*|//.*", class_file)
+
+
+
+
+		for l in method_lines:
+			
+			if not "private" in l:
+				methods.append(l)
+		
+		#Remove Commented Methods		
+		for c in comments:
+			for m in methods:
+				if m in c:
+					methods.remove(m)
+
+		return methods
+
+
+
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
@@ -87,19 +150,6 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 		#print lineStr
 
 		str = lineStr.strip()
-
-		
-
-		if str.startswith('$'):
-			print str
-			if "->" in str or ".." in str: #In the future replace ".."" with user settings for possible user snippet tabTriggers.  For example, I have a snippet that uses .. to create the -> for calling php methods.
-				print "str contains the characters: ->"
-
-			else:
-				print "str is not object"
-		else:
-			print "Not a Variable"
-	
 
 		#Build a list of all the php files in directory where active file resides.
 		if phpVariable == True:
