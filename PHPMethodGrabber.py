@@ -18,6 +18,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if line.startswith("$"):
 			a_view = self.view.substr(sublime.Region(0, self.view.size()))
 			class_name = self.get_class_name(line,a_view)
+			
 
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
@@ -45,7 +46,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		mcPatt = '\$(\w+)->'
 
-		identifier = re.findall(mcPatt, a_view)
+		identifier = re.findall(mcPatt, obj_line)
 		identifier = identifier[0]
 		print "Ide: " + identifier
 
@@ -60,7 +61,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			if class_name is not None:
 				class_name = class_name.group(2)
 			else:
-				print "class_name is NoNe"
+				print "class_name is None"
 				class_name = None
 			print "Obj Instantiation: " + v.substr(rg)
 		else:
@@ -85,8 +86,14 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			if ext == ".php":
 				print class_name
 				cfPatt = 'class ' + re.escape(class_name) + '\{'
-				fileit = fileDir + "\\" + fName + ext
-				
+				dir_len = fn.rfind('/')  # For OSX
+				fileit = ""
+
+				if dir_len > 0:
+					fileit = fileDir + "\\" + fName + ext
+				else:
+					fileit = fileDir + "/" + fName + ext
+
 				with open(fileit) as f:
 					read_data = f.read()
 
@@ -124,6 +131,9 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			for m in methods:
 				if m in c:
 					methods.remove(m)
+
+		for m in methods:
+			print m + "\n"
 
 		return methods
 
