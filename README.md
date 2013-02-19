@@ -30,14 +30,14 @@ Features
 
 For us programmers that are die hard dot syntax guys and don't like having to type the arrow.(I know we are lazy, but I am a creature of habit.)
 
-Pressing the ".." is replaced with the "->".
+The ".." is replaced with the "->" symbol.
 
 Upon the second press of the period Sublime's autocomplete is opened containing only the methods that are associated with that object.
 
 Notes:
 ==========
 
-Currently the class file must reside in the same Directory as the file you are working on.  This will be change very shortly to recursively search the project for the class file.
+Currently the class file must reside in the same Directory as the file you are working on.  This will be changed very shortly to recursively search the project for the class file.
 
 Upcoming features: 
 ==================
