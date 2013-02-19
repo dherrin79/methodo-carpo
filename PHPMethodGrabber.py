@@ -117,14 +117,14 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		
 		method_lines = re.findall('function.*|private.*|public.*|protected.*', class_file)
 		comments = re.findall("/\*.*|//.*", class_file)
-
-
-
+		
 
 		for l in method_lines:
 			
 			if not "private" in l:
-				methods.append(l)
+				s = re.search('(\w+)\s*\(.*\)(?=.*\{)', l)
+				if s:
+					methods.append(s.group().strip())
 		
 		#Remove Commented Methods		
 		for c in comments:
@@ -132,59 +132,43 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 				if m in c:
 					methods.remove(m)
 
-		for m in methods:
-			print m + "\n"
-
 		return methods
 
 
 	def build_completions_list(self, methods):
-		m= "not implemented"
+		meth= "not implemented"
+
+		for m in methods:
+			completions.append(m)
+ 
+
+
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
 
 	def on_query_completions(self, view, prefix, locations):
-		mg = methodgrabberCommand
-		phpVariable = False
-		words = set()
-		#Get the Current Directory
-		fileDir = os.path.dirname(view.file_name())
-		
-		#Get the Active Views File Name
-		fileName= os.path.basename(view.file_name())
-		
-		phpfiles = []
+		comp_list = []
 
-		
-		#Only build list if defining/typing a variable
-		if view.substr(locations[0] - 2) == ">" and view.substr(locations[0] - 3) == "-":
-			phpVariable = True
-
-		line =  view.line(locations[0])
+		for c in list(set(completions)):
+			cs = c
+			args = re.findall('\$\w+(?=\)|,)', cs)
+			cnt = 1
+			for a in args:
+				
+				a = a.replace("$", "$")
+				b = a
+				print "Arg: " + a
+				b = a.strip()
+				cs = cs.replace(a, '${' + str(cnt) + ':\$' + a + '}')
+				cnt = cnt + 1
 
 
-		lineStr = view.substr(line)
-		#print lineStr
+			comp_list.append((c, cs))
 
-		str = lineStr.strip()
-
-		#Build a list of all the php files in directory where active file resides.
-		if phpVariable == True:
-			for fn in os.listdir(fileDir):
-
-				fName, ext = os.path.splitext(fn)
-			
-				if ext == ".php" and fn != fileName:
-					phpfiles.append(fn)
-
-		phpfiles = set(phpfiles)
-
-		words.update(phpfiles)
-
-		matches = [(f,f) for f in words]
+		matches = []
 		#print locations
+		del completions[:]
 		
-		
-		return matches
+		return sorted(comp_list)
 
