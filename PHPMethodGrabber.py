@@ -145,10 +145,8 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			completions.append(m)
 
 		if methods:
-			print "true"
 			return True
 
-		print "false"
 		return False
  
 
