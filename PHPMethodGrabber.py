@@ -7,6 +7,7 @@ completions = []
 class FindMethodsCommand(sublime_plugin.TextCommand):
 
 	def run(self, edit):
+		print "run"
 		sel = self.view.sel()[0]
 		objIdentifier = self.view.word(sel.end()  -1)
 
@@ -23,32 +24,28 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
 		else:
-			self.view.run_command('auto_complete', {
-                'disable_auto_insert': True,
-                'api_completions_only': True,
-                'next_competion_if_showing': False
-                })
-
+			print "Class name: " + class_name
 			classDef = self.find_class_file(class_name)
 			#print "Class definition: " + classDef
 			methods = self.extract_class_methods(classDef)
 
-			self.build_completions_list(methods)
-
-
-
-
+			if self.build_completions_list(methods):
+				self.view.run_command('auto_complete', {
+                'disable_auto_insert': True,
+                'api_completions_only': True,
+                'next_competion_if_showing': False
+                })
+			else:
+				f = ""
 
 	def get_class_name(self, obj_line, a_view):
+		print "get_class_name"
 		v = self.view # shorten call to self.view
-		o_type = None
-		print "obj_line: " + obj_line
 
 		mcPatt = '\$(\w+)->'
 
 		identifier = re.findall(mcPatt, obj_line)
 		identifier = identifier[0]
-		print "Ide: " + identifier
 
 		oiPatt = '\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)'
 
@@ -56,21 +53,22 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			rg = v.find_all(oiPatt)[0]
 			clPatt = '\$\w+\s*=\s*new\s*(\w+)\(\)'
 			objInts = v.substr(rg)
-			print "Stupid: " + objInts
 			class_name = re.search('\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)' , objInts)
 			if class_name is not None:
 				class_name = class_name.group(2)
 			else:
-				print "class_name is None"
+				
 				class_name = None
-			print "Obj Instantiation: " + v.substr(rg)
+			
+			return class_name
 		else:
-			print "Object not instantiated!"
+			
 			class_name = None
 
 		return class_name
 
 	def find_class_file(self, class_name):
+		print "find_class_file"
 		fileName = ""
 		v = self.view
 		#Get the current directory
@@ -84,7 +82,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		for fn in os.listdir(fileDir):
 			fName, ext = os.path.splitext(fn)
 			if ext == ".php":
-				print class_name
+				
 				cfPatt = 'class ' + re.escape(class_name) + '\{'
 				dir_len = fn.rfind('/')  # For OSX
 				fileit = ""
@@ -100,29 +98,27 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 				cl = re.search(cfPatt, read_data)
 
 				if cl is not None:
-					print "Class file located."
 					return read_data
 
 				else:
-					print "Class File not located in " + fileDir
+					f = ""
 
 
 			elif ext == "":
-				print "This is a directory: " + fn
+				f = ""
 			else:
-				print "Other file types: " + fn
+				f = ""
 
 	def extract_class_methods(self, class_file):
+		print "extract_class_methods"
 		methods = []
 
 		method_lines = re.findall('function.*|private.*|public.*|protected.*', class_file)
 		comments = re.findall("/\*.*|//.*", class_file)
 
-
 		for l in method_lines:
-
 			if not "private" in l:
-				s = re.search('(\w+)\s*\(.*\)(?=.*\{)', l)
+				s = re.search('(\w+)\s*\(.*\)(?=.*\{*)', l)
 				if s:
 					methods.append(s.group().strip())
 
@@ -136,18 +132,24 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 
 	def build_completions_list(self, methods):
+		print "build_completions_list"
 		meth= "not implemented"
 
 		for m in methods:
 			completions.append(m)
+
+		if len(completions) > 0:
+			return True
+		return False
  
 
 
 
 
-class methodgrabberCommand(sublime_plugin.EventListener):
+class MethodGrabberComplete(sublime_plugin.EventListener):
 
 	def on_query_completions(self, view, prefix, locations):
+		print "on_query_completions"
 		comp_list = []
 
 		for c in list(set(completions)):
@@ -162,9 +164,7 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 				cnt = cnt + 1
 
 			comp_list.append((c, cs))
-
-		matches = []
-		#print locations
+			
 		del completions[:]
 
 		return sorted(comp_list)
