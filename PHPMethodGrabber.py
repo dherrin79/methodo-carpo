@@ -157,16 +157,9 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 			for a in args:
 				b = a
 				a = a.replace("$", "\$")
-				
-				print "Arg: " + a
-			
-				print "B: " + b
 				snippet = "${" + str(cnt) + ":" + a + "}"
-				print snippet
 				cs = cs.replace(b, snippet)
-				print "CS: " + cs
 				cnt = cnt + 1
-
 
 			comp_list.append((c, cs))
 
