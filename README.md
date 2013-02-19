@@ -27,6 +27,10 @@ The ".." is replaced with the "->" symbol.
 
 Upon the second press of the period Sublime's autocomplete is opened containing only the methods that are associated with that object.
 
+Notifies you when you misstype an object identifier. 
+
+
+
 Notes:
 ==========
 
