@@ -22,12 +22,19 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
 		else:
+			self.view.run_command('auto_complete', {
+                'disable_auto_insert': True,
+                'api_completions_only': True,
+                'next_competion_if_showing': False
+                })
 
 			classDef = self.find_class_file(class_name)
 			#print "Class definition: " + classDef
 			methods = self.extract_class_methods(classDef)
 
 			self.build_completions_list(methods)
+
+
 
 
 
@@ -121,7 +128,8 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		return methods
 
 
-	def build_completions_list(self, methods)
+	def build_completions_list(self, methods):
+		m= "not implemented"
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
