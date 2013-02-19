@@ -27,7 +27,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
 		else:
-			print "Line: " + line
+			
 
 			#UGLY!!! Work around for having to pres ".."
 			lineR = self.view.line(sel)
@@ -38,8 +38,6 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 				line = line.replace("->->", "->")
 				self.view.replace(edit, lineR, line)
 
-
-			print "Class name: " + class_name
 			classDef = self.find_class_file(class_name)
 			#print "Class definition: " + classDef
 			methods = self.extract_class_methods(classDef)
@@ -88,7 +86,30 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		v = self.view
 		#Get the current directory
 		fileDir = os.path.dirname(v.file_name())
+		rec_fileDir = fileDir
+		projectFilePath= ""
+		foundPrjFile = False
+		while not foundPrjFile:
+			for (path, dirs, files) in os.walk(rec_fileDir):
+				for fil in files:
+					
+					fn, ex = os.path.splitext(fil)
+					if ex == '.sublime-project':
+						
+						projectFilePath = path
+						foundPrjFile = True
 
+				print path
+				print dirs
+				print files
+				print "--------------"
+			head, tail = os.path.split(fileDir)
+			rec_fileDir = head
+			
+
+		print "Project File: " + projectFilePath
+		projFilePath = os.path.dirname(projectFilePath)
+		
 		#Get the active view's file name
 		fileName = os.path.basename(v.file_name())
 
@@ -114,6 +135,8 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 				if cl is not None:
 					return read_data
+				
+
 
 	def extract_class_methods(self, class_file):
 		print "extract_class_methods"
