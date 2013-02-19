@@ -155,12 +155,16 @@ class methodgrabberCommand(sublime_plugin.EventListener):
 			args = re.findall('\$\w+(?=\)|,)', cs)
 			cnt = 1
 			for a in args:
-				
-				a = a.replace("$", "$")
 				b = a
+				a = a.replace("$", "\$")
+				
 				print "Arg: " + a
-				b = a.strip()
-				cs = cs.replace(a, '${' + str(cnt) + ':\$' + a + '}')
+			
+				print "B: " + b
+				snippet = "${" + str(cnt) + ":" + a + "}"
+				print snippet
+				cs = cs.replace(b, snippet)
+				print "CS: " + cs
 				cnt = cnt + 1
 
 
