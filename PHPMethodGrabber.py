@@ -19,6 +19,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			a_view = self.view.substr(sublime.Region(0, self.view.size()))
 			class_name = self.get_class_name(line,a_view)
 
+
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
 		else:
@@ -45,7 +46,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		mcPatt = '\$(\w+)->'
 
-		identifier = re.findall(mcPatt, a_view)
+		identifier = re.findall(mcPatt, obj_line)
 		identifier = identifier[0]
 		print "Ide: " + identifier
 
@@ -60,7 +61,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			if class_name is not None:
 				class_name = class_name.group(2)
 			else:
-				print "class_name is NoNe"
+				print "class_name is None"
 				class_name = None
 			print "Obj Instantiation: " + v.substr(rg)
 		else:
@@ -78,28 +79,34 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		#Get the active view's file name
 		fileName = os.path.basename(v.file_name())
 
-		
+
 		read_data = ""
 		for fn in os.listdir(fileDir):
 			fName, ext = os.path.splitext(fn)
 			if ext == ".php":
 				print class_name
 				cfPatt = 'class ' + re.escape(class_name) + '\{'
-				fileit = fileDir + "\\" + fName + ext
-				
+				dir_len = fn.rfind('/')  # For OSX
+				fileit = ""
+
+				if dir_len > 0:
+					fileit = fileDir + "\\" + fName + ext
+				else:
+					fileit = fileDir + "/" + fName + ext
+
 				with open(fileit) as f:
 					read_data = f.read()
 
 				cl = re.search(cfPatt, read_data)
-				
+
 				if cl is not None:
 					print "Class file located."
 					return read_data
-					
+
 				else:
 					print "Class File not located in " + fileDir
 
-				
+
 			elif ext == "":
 				print "This is a directory: " + fn
 			else:
@@ -107,18 +114,18 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 	def extract_class_methods(self, class_file):
 		methods = []
-		
+
 		method_lines = re.findall('function.*|private.*|public.*|protected.*', class_file)
 		comments = re.findall("/\*.*|//.*", class_file)
 
 
-
-
 		for l in method_lines:
-			
+
 			if not "private" in l:
-				methods.append(l)
-		
+				s = re.search('(\w+)\s*\(.*\)(?=.*\{)', l)
+				if s:
+					methods.append(s.group().strip())
+
 		#Remove Commented Methods		
 		for c in comments:
 			for m in methods:
@@ -129,52 +136,37 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 
 	def build_completions_list(self, methods):
-		m= "not implemented"
+		meth= "not implemented"
+
+		for m in methods:
+			completions.append(m)
+ 
+
+
 
 
 class methodgrabberCommand(sublime_plugin.EventListener):
 
 	def on_query_completions(self, view, prefix, locations):
-		mg = methodgrabberCommand
-		phpVariable = False
-		words = set()
-		#Get the Current Directory
-		fileDir = os.path.dirname(view.file_name())
-		
-		#Get the Active Views File Name
-		fileName= os.path.basename(view.file_name())
-		
-		phpfiles = []
+		comp_list = []
 
-		
-		#Only build list if defining/typing a variable
-		if view.substr(locations[0] - 2) == ">" and view.substr(locations[0] - 3) == "-":
-			phpVariable = True
+		for c in list(set(completions)):
+			cs = c
+			args = re.findall('\$\w+(?=\)|,)', cs)
+			cnt = 1
+			for a in args:
+				b = a
+				a = a.replace("$", "\$")
+				snippet = "${" + str(cnt) + ":" + a + "}"
+				cs = cs.replace(b, snippet)
+				cnt = cnt + 1
 
-		line =  view.line(locations[0])
+			comp_list.append((c, cs))
 
-
-		lineStr = view.substr(line)
-		#print lineStr
-
-		str = lineStr.strip()
-
-		#Build a list of all the php files in directory where active file resides.
-		if phpVariable == True:
-			for fn in os.listdir(fileDir):
-
-				fName, ext = os.path.splitext(fn)
-			
-				if ext == ".php" and fn != fileName:
-					phpfiles.append(fn)
-
-		phpfiles = set(phpfiles)
-
-		words.update(phpfiles)
-
-		matches = [(f,f) for f in words]
+		matches = []
 		#print locations
-		
-		
-		return matches
+		del completions[:]
+
+		return sorted(comp_list)
+
 
