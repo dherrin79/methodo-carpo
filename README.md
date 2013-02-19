@@ -3,17 +3,10 @@ methodo-carpo
 
 Sublime Text 2 Plugin
 
+PHP ONLY
+========
+
 PHP Method Grabber
-
-Functionality Goals:
-
-
-
-Look up PHP Class files in current directory
-
-
-
-2013-02-17  Currenty under development.
 
 Notes:
 	Working on a way to only have to press the period one time. 
