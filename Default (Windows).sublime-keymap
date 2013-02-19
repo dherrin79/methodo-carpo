@@ -8,15 +8,5 @@
         "key": "selector"
       }
     ]
-  },
-  { "keys": [">"], "command": "find_methods", 
-  "context": [
-      {
-        "operand": "source.php",
-        "operator": "equal", 
-        "match_all": true, 
-        "key": "selector"
-      }
-    ]
   }
 ]

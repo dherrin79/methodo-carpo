@@ -7,13 +7,46 @@ PHP Method Grabber
 
 Functionality Goals:
 
-Detect PHP Objects in active buffer
+
 
 Look up PHP Class files in current directory
 
-Grab methods only from the class that is associated with the object currently being worked on
 
-If possible override auto-completions list and add only those methods to it. 
 
 2013-02-17  Currenty under development.
+
+Notes:
+	Working on a way to only have to press the period one time. 
+	For some reason if you only press it one time the event is ran before the list is built.
+
+
+
+Usage:
+======
+Pressing ".." after object opens ST2's autocomplete.
+
+Features
+========
+
+For us programmers that are die hard dot syntax guys and don't like having to type the arrow.(I know we are lazy, but I am a creature of habit.)
+
+Pressing the ".." is replaced with the "->".
+
+Upon the second press of the period Sublime's autocomplete is opened containing only the methods that are associated with that object.
+
+Notes:
+==========
+
+Currently the class file must reside in the same Directory as the file you are working on.  This will be change very shortly to recursively search the project for the class file.
+
+Upcoming features: 
+==================
+
+For you die hard guys that just have to type the "->" to access your object methods there will shortly be functionality for that as well.
+
+Access to parent/base class methods.
+
+
+
+
 

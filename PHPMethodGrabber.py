@@ -12,9 +12,12 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		objIdentifier = self.view.word(sel.end()  -1)
 
 		self.view.insert(edit, sel.begin() , "->")
+
 		line = self.view.line(sel)
 
 		line = self.view.substr(line).strip()
+
+
 		class_name = ""
 		if line.startswith("$"):
 			a_view = self.view.substr(sublime.Region(0, self.view.size()))
@@ -24,6 +27,18 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if not class_name:
 			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
 		else:
+			print "Line: " + line
+
+			#UGLY!!! Work around for having to pres ".."
+			lineR = self.view.line(sel)
+			line = self.view.substr(lineR)
+			first_arrow = re.findall("->", line)
+			if len(first_arrow) > 1:
+				lineR = self.view.line(sel)
+				line = line.replace("->->", "->")
+				self.view.replace(edit, lineR, line)
+
+
 			print "Class name: " + class_name
 			classDef = self.find_class_file(class_name)
 			#print "Class definition: " + classDef
@@ -83,7 +98,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			fName, ext = os.path.splitext(fn)
 			if ext == ".php":
 				
-				cfPatt = 'class ' + re.escape(class_name) + '\{'
+				cfPatt = 'class ' + re.escape(class_name) + '\{*'
 				dir_len = fn.rfind('/')  # For OSX
 				fileit = ""
 
@@ -92,22 +107,13 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 				else:
 					fileit = fileDir + "/" + fName + ext
 
-				with open(fileit) as f:
+				with open(fileit, 'r') as f:
 					read_data = f.read()
 
 				cl = re.search(cfPatt, read_data)
 
 				if cl is not None:
 					return read_data
-
-				else:
-					f = ""
-
-
-			elif ext == "":
-				f = ""
-			else:
-				f = ""
 
 	def extract_class_methods(self, class_file):
 		print "extract_class_methods"
@@ -138,8 +144,11 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		for m in methods:
 			completions.append(m)
 
-		if len(completions) > 0:
+		if methods:
+			print "true"
 			return True
+
+		print "false"
 		return False
  
 
