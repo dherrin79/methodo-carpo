@@ -8,9 +8,14 @@ PHP ONLY
 
 PHP Method Grabber
 
-Notes:
+Notes and Issues:
 	Working on a way to only have to press the period one time. 
 	For some reason if you only press it one time the event is ran before the list is built.
+
+	There is undesirable behavior when using "." in other places such as:
+		If you type "." in the middle of a string it sends the cursor to the end of the line.
+		When you edit a concatination it will send the cursor to the end of the  line.
+
 
 
 
@@ -29,12 +34,6 @@ Upon the second press of the period Sublime's autocomplete is opened containing 
 
 Notifies you when you mistype an object identifier. 
 
-
-
-Notes:
-==========
-
-Currently the class file must reside in the same Directory as the file you are working on.  This will be changed very shortly to recursively search the project for the class file.
 
 Upcoming features: 
 ==================

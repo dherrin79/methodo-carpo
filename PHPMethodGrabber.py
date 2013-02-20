@@ -13,11 +13,26 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		self.view.insert(edit, sel.begin() , "->")
 
+		mcPatt = '\$(\w+)->'
+
+
+
 		line = self.view.line(sel)
 
-		line = self.view.substr(line).strip()
+		line = self.view.substr(line)
+		lineCk = line
+		line = line.strip()
+		check = re.search(mcPatt, lineCk)
+
+		if not check:
+			lineRegion = self.view.line(sel)
+			lineCk = lineCk.replace("->", ".")
+			self.view.replace(edit, lineRegion, lineCk)
+			return False
 
 
+
+		print "Passed check"
 		class_name = ""
 		if line.startswith("$"):
 			a_view = self.view.substr(sublime.Region(0, self.view.size()))
@@ -80,11 +95,111 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		return class_name
 
+	def walk(self, dir_name, cfPatt):
+		print dir_name
+		for (path, dirs, files) in os.walk(dir_name):
+			for fil in files:
+				fn, ext = os.path.splitext(fil)
+				if ext == ".php":
+					with open(os.path.join(path, fil)) as f:
+						read_data = f.read()
+						cl = re.search(cfPatt, read_data)
+						if cl:
+							return read_data
+						else:
+							return False
+
 	def find_class_file(self, class_name):
 		print "find_class_file"
 		fileName = ""
 		v = self.view
-		#Get the current directory
+		#Step 1:Check active file for Class
+		a_view = v.substr(sublime.Region(0, self.view.size()))
+		cfPatt = 'class\s*' + re.escape(class_name) + '\{[\s\S]+\}'
+		
+		clnm = re.search(cfPatt, a_view)
+		if clnm is not None:
+			print "Class file found"
+			return clnm.group()
+
+		#Step 2: Check current directory
+		curr_dir = os.path.dirname(v.file_name())
+		for php in os.listdir(curr_dir):
+			fn, ext = os.path.splitext(php)
+			if ext == ".php":
+				with open(os.path.join(curr_dir, php)) as f:
+					read_data = f.read()
+					cl = re.search(cfPatt, read_data)
+					if cl:
+						return read_data
+
+		
+		#Step 2: Check PHP includes paths
+		inclPatt = 'include\s*"(\S+?)";'
+		stepUp = '\.\./'
+
+		foldPatt = '(\w+)/'
+		
+		clPath = re.findall(inclPatt, a_view)
+		
+		if len(clPath) > 0:
+			print "Include found."
+			for i in clPath:
+
+				#Check for '/'
+				if i.startswith("/"):
+					
+					folders = re.findall(foldPatt, i)
+					
+					fCnt = 0
+					d = os.path.dirname(v.file_name())
+					for g in folders:
+						
+						d = os.path.join(d, folders[fCnt])
+						fCnt = fCnt + 1
+
+					for php in os.listdir(d):
+						fn, ext = os.path.splitext(php)
+						if ext == ".php":
+							with open(os.path.join(d, php)) as f:
+								read_data = f.read()
+								cl = re.search(cfPatt, read_data)
+								if cl:
+									return read_data
+				
+				#Check for '../'
+				if i.startswith("../"):
+					pardir = re.findall(stepUp, i)
+					
+					newDir = ""
+					rec_dir = os.path.dirname(v.file_name())
+					if len(pardir) > 0:
+						cnt = 0
+						for p in pardir:
+							head, tail = os.path.split(rec_dir)
+							newDir = head
+							cnt = cnt + 1
+							
+							rec_dir = head
+						print newDir
+						fCnt = 0
+						d = newDir
+						folders = re.findall(foldPatt, i)
+						for g in folders:
+							d = os.path.join(d, folders[fCnt])
+							fCnt = fCnt + 1
+
+						for php in os.listdir(d):
+							fn, ext = os.path.splitext(php)
+							if ext == ".php":
+								with open(os.path.join(d, php)) as f:
+									read_data = f.read()
+									cl = re.search(cfPatt, read_data)
+									if cl:
+										return read_data
+
+		#Step 3: Check .sublime-project paths
+
 		fileDir = os.path.dirname(v.file_name())
 		rec_fileDir = fileDir
 		projectFilePath= ""
@@ -99,10 +214,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 						projectFilePath = path
 						foundPrjFile = True
 
-				print path
-				print dirs
-				print files
-				print "--------------"
+				
 			head, tail = os.path.split(fileDir)
 			rec_fileDir = head
 			
@@ -112,31 +224,6 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		
 		#Get the active view's file name
 		fileName = os.path.basename(v.file_name())
-
-
-		read_data = ""
-		for fn in os.listdir(fileDir):
-			fName, ext = os.path.splitext(fn)
-			if ext == ".php":
-				
-				cfPatt = 'class ' + re.escape(class_name) + '\{*'
-				dir_len = fn.rfind('/')  # For OSX
-				fileit = ""
-
-				if dir_len > 0:
-					fileit = fileDir + "\\" + fName + ext
-				else:
-					fileit = fileDir + "/" + fName + ext
-
-				with open(fileit, 'r') as f:
-					read_data = f.read()
-
-				cl = re.search(cfPatt, read_data)
-
-				if cl is not None:
-					return read_data
-				
-
 
 	def extract_class_methods(self, class_file):
 		print "extract_class_methods"
