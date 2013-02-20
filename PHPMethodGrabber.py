@@ -11,11 +11,9 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		sel = self.view.sel()[0]
 		objIdentifier = self.view.word(sel.end()  -1)
 
-		self.view.insert(edit, sel.begin() , "->")
+		
 
-		mcPatt = '\$(\w+)->'
-
-
+		mcPatt = '\$(\w+)'
 
 		line = self.view.line(sel)
 
@@ -24,15 +22,9 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		line = line.strip()
 		check = re.search(mcPatt, lineCk)
 
-		if not check:
-			lineRegion = self.view.line(sel)
-			lineCk = lineCk.replace("->", ".")
-			self.view.replace(edit, lineRegion, lineCk)
-			return False
+		
 
 
-
-		print "Passed check"
 		class_name = ""
 		if line.startswith("$"):
 			a_view = self.view.substr(sublime.Region(0, self.view.size()))
@@ -40,9 +32,9 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 
 		if not class_name:
-			self.view.insert(edit, sel.begin() + 2, "Error: Identifier has not been declared!")
+			self.view.insert(edit, sel.end() , ".")
 		else:
-			
+			self.view.insert(edit, sel.begin() , "->")
 
 			#UGLY!!! Work around for having to pres ".."
 			lineR = self.view.line(sel)
@@ -70,7 +62,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		print "get_class_name"
 		v = self.view # shorten call to self.view
 
-		mcPatt = '\$(\w+)->'
+		mcPatt = '\$(\w+)'
 
 		identifier = re.findall(mcPatt, obj_line)
 		identifier = identifier[0]
