@@ -10,27 +10,13 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		print "run"
 		sel = self.view.sel()[0]
 		objIdentifier = self.view.word(sel.end()  -1)
-
-		
-
 		mcPatt = '\$(\w+)'
-
 		line = self.view.line(sel)
-
-		line = self.view.substr(line)
-		lineCk = line
-		line = line.strip()
-		check = re.search(mcPatt, lineCk)
-
-		
-
-
+		line = self.view.substr(line).strip()
 		class_name = ""
 		if line.startswith("$"):
 			a_view = self.view.substr(sublime.Region(0, self.view.size()))
 			class_name = self.get_class_name(line,a_view)
-
-
 		if not class_name:
 			self.view.insert(edit, sel.end() , ".")
 		else:
@@ -55,18 +41,13 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
                 'api_completions_only': True,
                 'next_competion_if_showing': False
                 })
-			else:
-				f = ""
 
 	def get_class_name(self, obj_line, a_view):
 		print "get_class_name"
 		v = self.view # shorten call to self.view
-
 		mcPatt = '\$(\w+)'
-
 		identifier = re.findall(mcPatt, obj_line)
 		identifier = identifier[0]
-
 		oiPatt = '\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)'
 
 		if v.find_all(oiPatt):
@@ -77,16 +58,14 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			if class_name is not None:
 				class_name = class_name.group(2)
 			else:
-				
 				class_name = None
-			
 			return class_name
 		else:
-			
 			class_name = None
 
 		return class_name
 
+	#For some reason when using this fuction it slows downs the autocomplete
 	def walk(self, dir_name, cfPatt):
 		print dir_name
 		for (path, dirs, files) in os.walk(dir_name):
@@ -125,11 +104,9 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 					if cl:
 						return read_data
 
-		
-		#Step 2: Check PHP includes paths
+		#Step 3: Check PHP includes paths
 		inclPatt = 'include\s*"(\S+?)";'
 		stepUp = '\.\./'
-
 		foldPatt = '(\w+)/'
 		
 		clPath = re.findall(inclPatt, a_view)
@@ -137,16 +114,12 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		if len(clPath) > 0:
 			print "Include found."
 			for i in clPath:
-
 				#Check for '/'
-				if i.startswith("/"):
-					
+				if i.startswith("/"):	
 					folders = re.findall(foldPatt, i)
-					
 					fCnt = 0
 					d = os.path.dirname(v.file_name())
 					for g in folders:
-						
 						d = os.path.join(d, folders[fCnt])
 						fCnt = fCnt + 1
 
@@ -162,7 +135,6 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 				#Check for '../'
 				if i.startswith("../"):
 					pardir = re.findall(stepUp, i)
-					
 					newDir = ""
 					rec_dir = os.path.dirname(v.file_name())
 					if len(pardir) > 0:
@@ -171,9 +143,8 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 							head, tail = os.path.split(rec_dir)
 							newDir = head
 							cnt = cnt + 1
-							
 							rec_dir = head
-						print newDir
+						
 						fCnt = 0
 						d = newDir
 						folders = re.findall(foldPatt, i)
@@ -190,7 +161,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 									if cl:
 										return read_data
 
-		#Step 3: Check .sublime-project paths
+		#Step 4: Check .sublime-project paths
 
 		fileDir = os.path.dirname(v.file_name())
 		rec_fileDir = fileDir
@@ -199,7 +170,6 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		while not foundPrjFile:
 			for (path, dirs, files) in os.walk(rec_fileDir):
 				for fil in files:
-					
 					fn, ex = os.path.splitext(fil)
 					if ex == '.sublime-project':
 						
@@ -250,10 +220,6 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 			return True
 
 		return False
- 
-
-
-
 
 class MethodGrabberComplete(sublime_plugin.EventListener):
 
