@@ -87,7 +87,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		v = self.view
 		#Step 1:Check active file for Class
 		a_view = v.substr(sublime.Region(0, self.view.size()))
-		cfPatt = 'class\s*' + re.escape(class_name) + '\{[\s\S]+\}'
+		cfPatt = 'class\s*' + re.escape(class_name) + '\s*\{[\s\S]+\}'
 		
 		clnm = re.search(cfPatt, a_view)
 		if clnm is not None:
@@ -164,13 +164,14 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		#Step 4: Check .sublime-project paths
 
-		fileDir = os.path.dirname(v.file_name())
+		'''fileDir = os.path.dirname(v.file_name())
 		rec_fileDir = fileDir
 		projectFilePath= ""
 		foundPrjFile = False
 		while not foundPrjFile:
 			for (path, dirs, files) in os.walk(rec_fileDir):
 				for fil in files:
+					print files
 					fn, ex = os.path.splitext(fil)
 					if ex == '.sublime-project':
 						
@@ -178,15 +179,17 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 						foundPrjFile = True
 
 				
-			head, tail = os.path.split(fileDir)
-			rec_fileDir = head
+				head, tail = os.path.split(rec_fileDir)
+				rec_fileDir = head
+				print "Head: " + rec_fileDir
 			
 
 		print "Project File: " + projectFilePath
 		projFilePath = os.path.dirname(projectFilePath)
+		print projectFilePath
 		
 		#Get the active view's file name
-		fileName = os.path.basename(v.file_name())
+		fileName = os.path.basename(v.file_name())'''
 
 	def extract_class_methods(self, class_file):
 		print "extract_class_methods"
