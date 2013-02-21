@@ -27,6 +27,8 @@ The ".." is replaced with the "->" symbol.
 
 Upon the second press of the period Sublime's autocomplete is opened containing only the methods that are associated with that object.
 
+If this doesn't work check your include paths.  Make sure your class file has been saved.
+
 
 Upcoming features: 
 ==================
