@@ -49,7 +49,7 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 		mcPatt = '\$(\w+)'
 		identifier = re.findall(mcPatt, obj_line)
 		identifier = identifier[0]
-		oiPatt = '\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)'
+		oiPatt = '\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(*\)*'
 
 		if v.find_all(oiPatt):
 			rg = v.find_all(oiPatt)[0]
