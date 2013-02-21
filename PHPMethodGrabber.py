@@ -4,6 +4,7 @@ import os
 
 completions = []
 
+
 class FindMethodsCommand(sublime_plugin.TextCommand):
 
 	def run(self, edit):
@@ -226,7 +227,6 @@ class MethodGrabberComplete(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, locations):
 		print "on_query_completions"
 		comp_list = []
-
 		for c in list(set(completions)):
 			cs = c
 			args = re.findall('\$\w+(?=\)|,)', cs)
@@ -243,5 +243,4 @@ class MethodGrabberComplete(sublime_plugin.EventListener):
 		del completions[:]
 
 		return sorted(comp_list)
-
-
+		
