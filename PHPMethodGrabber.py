@@ -53,9 +53,9 @@ class FindMethodsCommand(sublime_plugin.TextCommand):
 
 		if v.find_all(oiPatt):
 			rg = v.find_all(oiPatt)[0]
-			clPatt = '\$\w+\s*=\s*new\s*(\w+)\(\)'
+			clPatt = '\$\w+\s*=\s*new\s*(\w+)\(*\)*'
 			objInts = v.substr(rg)
-			class_name = re.search('\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(\)' , objInts)
+			class_name = re.search('\$(' + re.escape(identifier) + ')\s*=\s*new\s*(\w+)\(*\)*' , objInts)
 			if class_name is not None:
 				class_name = class_name.group(2)
 			else:
